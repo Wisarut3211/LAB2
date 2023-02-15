@@ -45,7 +45,8 @@ DMA_HandleTypeDef hdma_adc1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint32_t adcRawData;
+uint32_t time;
+uint32_t T;
 //declare buffer for DMA to Transmit to.
 uint16_t Vin;
 uint16_t Vin_0;
@@ -120,19 +121,25 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  register int i;
-	  for(i=0;i<10;i++)
-	  {
-	  Vin_0 = Vin_0 + adcDMA[i].in0;
-	  Temp_raw = Temp_raw + adcDMA[i].temp;
-	  }
+	  time = HAL_GetTick();
 
-	  Vin = (Vin_0/10)*4095/2500;
-	  Temp_cel = ((((Temp_raw/10)/2155.79)-0.76)/2.5)+25;
+	  if (time > T)
+	  {
+		  T = time + 1000;
+		  register int i;
+		  for(i=0;i<10;i++)
+		  {
+			  Vin_0 = Vin_0 + adcDMA[i].in0;
+			  Temp_raw = Temp_raw + adcDMA[i].temp;
+		  }
+
+	  Vin = (Vin_0/10)/4095.0*3300*2;
+	  Temp_cel = ((((Temp_raw/10)/4095.0*3300)-760)/2.5)+25;
 	  Temp_kelvin = Temp_cel + 273.15;
 
 	  Vin_0 = 0;
 	  Temp_raw = 0;
+	  }
   }
   /* USER CODE END 3 */
 }
